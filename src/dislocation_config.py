@@ -11,6 +11,10 @@ class SingleStraightDislocation:
         self._line_dir = line_dir
         self._core_mean_loc = core_mean_loc
         self._core_smearing_parameters = core_smearing_parameters
+        if not np.isclose(np.dot(self._core_smearing_parameters["core_spread_dir"],
+                                 self._line_dir), 0.0):
+            raise ValueError("Core smearing direction must be perpendicular to the "+
+                             "dislocation line direction")
         self._generate_discretized_smeared_out_dislocations()
 
     @property
