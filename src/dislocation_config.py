@@ -100,7 +100,20 @@ class SingleStraightDislocation:
     def discretized_dislocation(self):
         return self._discretized_dislocation
 
-    def compute_displacements(self, media, detection_points, cut_plane):
+    def compute_displacements(self, media, detection_points, 
+                              cut_plane = None):
+        
+        detection_pts_translated = detection_points - discrete_b_pos[:, np.newaxis, :]
+        if np.any(np.all(np.isclose(detection_pts_translated, 0.0), axis = 2)):
+            raise RuntimeError('Detection point cannot be at the origin')
+        
+
+    def compute_stress_n_strain(self, media, detection_points):
+        pass
+
+class PeriodicArrayStraightDislocations:
+    def compute_displacements(self, media, detection_points, 
+                              cut_planes=None):
         pass
 
     def compute_stress_n_strain(self, media, detection_points):
