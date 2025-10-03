@@ -107,18 +107,73 @@ class SingleStraightDislocation:
     def compute_displacements(self, media, detection_points, 
                               cut_plane = None):
         
-        detection_pts_translated = detection_points - discrete_b_pos[:, np.newaxis, :]
+        detection_pts_translated = (detection_points - 
+                                    self.discretized_dislocation["discrete_b_pos"][:,None,:])
         if np.any(np.all(np.isclose(detection_pts_translated, 0.0), axis = 2)):
-            raise RuntimeError('Detection point cannot be at the origin')
+            raise RuntimeError('Detection point(s) coincides with dislocation core')
         
 
     def compute_stress_n_strain(self, media, detection_points):
         pass
 
 class PeriodicArrayStraightDislocations:
-    def compute_displacements(self, media, detection_points, 
-                              cut_planes=None):
-        pass
 
-    def compute_stress_n_strain(self, media, detection_points):
-        pass
+    def __init__(self, straight_disl, lattice_primitive_vectors, 
+                 lattice_origin_loc):
+        self._straight_disl = straight_disl
+        self._lattice_primitive_vectors = lattice_primitive_vectors
+        #### USING SETATTR MAKE self._lattice_primitive_vectors a 2D ARRAY EVEN WHEN THERE IS ONLY ONE VECTOR
+        self._lattice_origin_loc = lattice_origin_loc
+        line_dir = self._straight_disl.line_dir
+        if not np.allclose(np.dot(self._lattice_primitive_vectors, 
+                                    line_dir), 0):
+            raise ValueError("The periodic dislocation array lattice must be perpendicular " +
+                                "to the dislocation line direction")
+
+
+    @property
+    def straight_disl(self):
+        return self._straight_disl
+    
+    @property
+    def lattice_primitive_vectors(self):
+        return self._lattice_primitive_vectors
+    
+    @property
+    def lattice_origin_loc(self):
+        return self._lattice_origin_loc
+
+    def compute_displacements(self, media, detection_points, 
+                              lattice_extents,
+                              cut_planes=None):
+        
+        if len(lattice_extents) != len(self.lattice_primitive_vectors):
+            raise ValueError("Lattice extents must be provided for each "+
+                             "lattice primitive vectors")
+        if len(lattice_extents) == 1:
+            X = np.arange(*lattice_extents)
+            dislocation_positions = ((X[:,None]*self.lattice_primitive_vectors) + 
+                                     self.lattice_origin_loc)
+        elif len(lattice_extents) == 2:
+            X,Y = np.meshgrid(*[np.arange(*x) for x in lattice_extents])
+            dislocation_positions = (np.dot(np.c_[X.ravel(), Y.ravel()],
+                                            self.lattice_primitive_vectors) + 
+                                     self.lattice_origin_loc)
+        
+
+
+    def compute_stress_n_strain(self, media, detection_points,
+                                lattice_extents):
+        
+        if len(lattice_extents) != len(self.lattice_primitive_vectors):
+            raise ValueError("Lattice extents must be provided for each "+
+                             "lattice primitive vectors")
+        if len(lattice_extents) == 1:
+            X = np.arange(*lattice_extents)
+            dislocation_positions = ((X[:,None]*self.lattice_primitive_vectors) + 
+                                     self.lattice_origin_loc)
+        elif len(lattice_extents) == 2:
+            X,Y = np.meshgrid(*[np.arange(*x) for x in lattice_extents])
+            dislocation_positions = (np.dot(np.c_[X.ravel(), Y.ravel()],
+                                            self.lattice_primitive_vectors) + 
+                                     self.lattice_origin_loc)
