@@ -152,9 +152,9 @@ class PeriodicArrayStraightDislocations:
     def lattice_origin_loc(self):
         return self._lattice_origin_loc
 
-    def compute_displacements(self, media, detection_points, 
-                              lattice_extents,
-                              cut_planes=None):
+    def compute_dislocation_fields(self, mu, nu, detection_points, 
+                                   lattice_extents,
+                                   m0=None, n0=None):
         
         if len(lattice_extents) != len(self.lattice_primitive_vectors):
             raise ValueError("Lattice extents must be provided for each "+
@@ -168,21 +168,28 @@ class PeriodicArrayStraightDislocations:
             dislocation_positions = (np.dot(np.c_[X.ravel(), Y.ravel()],
                                             self.lattice_primitive_vectors) + 
                                      self.lattice_origin_loc)
+            
+        nett_b = self.straight_disl.nett_b
+        line_dir = self.straight_disl.line_dir
+        core_smearing_parameters = self.straight_disl.core_smearing_parameters
+        #SPECIFY m0, n0 restrictions more clearly
+        if m0 is None:
+            m0 = [m0]*len(dislocation_positions)
+        if n0 is None:
+            n0 = [n0]*len(dislocation_positions)
+
+        u = np.zeros((len(detection_points), 3))
+        stress = np.zeros((len(detection_points), 6))
+        for i, disl_pos in enumerate(dislocation_positions):
+            str_disl = SingleStraightDislocation(nett_b, line_dir, disl_pos,
+                                                 core_smearing_parameters)
+            fields = str_disl.compute_dislocation_fields(
+                                                mu, nu, detection_points, 
+                                                m0[i], n0[i])
+            u += fields[0]; stress += fields[1]
+
+        return u, stress
+            
+        
         
 
-
-    def compute_stress_n_strain(self, media, detection_points,
-                                lattice_extents):
-        
-        if len(lattice_extents) != len(self.lattice_primitive_vectors):
-            raise ValueError("Lattice extents must be provided for each "+
-                             "lattice primitive vectors")
-        if len(lattice_extents) == 1:
-            X = np.arange(*lattice_extents)
-            dislocation_positions = ((X[:,None]*self.lattice_primitive_vectors) + 
-                                     self.lattice_origin_loc)
-        elif len(lattice_extents) == 2:
-            X,Y = np.meshgrid(*[np.arange(*x) for x in lattice_extents])
-            dislocation_positions = (np.dot(np.c_[X.ravel(), Y.ravel()],
-                                            self.lattice_primitive_vectors) + 
-                                     self.lattice_origin_loc)
