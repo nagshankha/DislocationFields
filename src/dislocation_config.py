@@ -113,7 +113,17 @@ class SingleStraightDislocation:
         if np.any(np.all(np.isclose(detection_pts_translated, 0.0), axis = 2)):
             raise RuntimeError('Detection point(s) coincides with dislocation core')
         
-        
+        u = np.zeros((len(detection_points), 3))
+        stress = np.zeros((len(detection_points), 6))
+
+        for i, b in enumerate(self.discretized_dislocation["discrete_b_vec"]):
+            fields = isotropic_soln(mu, nu, self.line_dir, b, 
+                                    detection_pts_translated[i], m0, n0)
+            u += fields[0]; stress += fields[1]
+
+        return u, stress
+
+
 
 class PeriodicArrayStraightDislocations:
 
@@ -127,7 +137,7 @@ class PeriodicArrayStraightDislocations:
         if not np.allclose(np.dot(self._lattice_primitive_vectors, 
                                     line_dir), 0):
             raise ValueError("The periodic dislocation array lattice must be perpendicular " +
-                                "to the dislocation line direction")
+                             "to the dislocation line direction")
 
 
     @property
