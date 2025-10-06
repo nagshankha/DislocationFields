@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+from .dislocation_fields import isotropic_soln
 
 class SingleStraightDislocation:
     def __init__(self, nett_b, line_dir, core_mean_loc,
@@ -104,17 +105,15 @@ class SingleStraightDislocation:
     def discretized_dislocation(self):
         return self._discretized_dislocation
 
-    def compute_displacements(self, media, detection_points, 
-                              cut_plane = None):
+    def compute_dislocation_fields(self, mu, nu, detection_points, 
+                                   m0=None, n0=None):
         
         detection_pts_translated = (detection_points - 
                                     self.discretized_dislocation["discrete_b_pos"][:,None,:])
         if np.any(np.all(np.isclose(detection_pts_translated, 0.0), axis = 2)):
             raise RuntimeError('Detection point(s) coincides with dislocation core')
         
-
-    def compute_stress_n_strain(self, media, detection_points):
-        pass
+        
 
 class PeriodicArrayStraightDislocations:
 
