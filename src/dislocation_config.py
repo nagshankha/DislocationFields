@@ -172,11 +172,120 @@ class PeriodicArrayStraightDislocations:
         nett_b = self.straight_disl.nett_b
         line_dir = self.straight_disl.line_dir
         core_smearing_parameters = self.straight_disl.core_smearing_parameters
-        #SPECIFY m0, n0 restrictions more clearly
+
+        #### Checking the validity of m0 ####
         if m0 is None:
             m0 = [m0]*len(dislocation_positions)
+        elif (isinstance(m0, np.ndarray) and 
+                (np.issubdtype(m0.dtype, np.floating) or
+                    np.issubdtype(m0.dtype, np.integer))):
+            if (m0.shape==(3,)):
+                m0 = np.repeat(m0[None,:], 
+                          len(dislocation_positions), 
+                          axis=0)                
+            elif (m0.shape==(1,3)):
+                m0 = np.repeat(m0, 
+                          len(dislocation_positions), 
+                          axis=0)
+            elif (m0.shape==(len(dislocation_positions),3)):
+                pass
+            else:
+                ValueError("If m0 is a floating or integer numpy array, "+
+                           "its shape must be either (3,) or (1,3) or "+
+                           "(n_dislocation, 3). In this case, n_dislocation = "+
+                           f"{len(dislocation_positions)} whereas the shape of m0 "+
+                           f"is {m0.shape}")
+        elif isinstance(m0, list):
+            if ((len(m0)==3) and 
+                 np.all([isinstance(x, (int, float)) for x in m0])):
+                m0 = np.repeat(np.array(m0)[None,:], 
+                          len(dislocation_positions), 
+                          axis=0)
+            elif ((len(m0)==1) and 
+                  (isinstance(m0[0], list) and len(m0[0])==3 and
+                   np.all([isinstance(x, (int, float)) for x in m0[0]])) or
+                  (isinstance(m0[0], np.ndarray) and m0[0].shape==(3,) and
+                   (np.issubdtype(m0[0], np.integer) or 
+                    np.issubdtype(m0[0], np.floating))) ):
+                m0 = np.repeat(m0, 
+                          len(dislocation_positions), 
+                          axis=0)
+            elif (len(m0)==len(dislocation_positions)):
+                for m0_entry in m0:
+                    if m0_entry is None:
+                        pass
+                    elif (isinstance(m0_entry, list) and len(m0_entry)==3 and
+                        np.all([isinstance(x, (int, float)) for x in m0_entry])):
+                        pass
+                    elif (isinstance(m0_entry, np.ndarray) and m0_entry.shape==(3,) and
+                         (np.issubdtype(m0_entry, np.integer) or 
+                          np.issubdtype(m0_entry, np.floating))):
+                        pass
+                    else:
+                        raise ValueError("If m0 is a list of n_dislocation entries, "+
+                                         "then each entry must be either None or list/array of "+
+                                         "three numbers (int/float)")
+            else:
+                raise ValueError("Wrong number of entries in m0")
+        else:
+            raise ValueError("m0 must be either None or a list or a numpy array") 
+
+        #### Checking the validity of n0 #### 
         if n0 is None:
             n0 = [n0]*len(dislocation_positions)
+        elif (isinstance(n0, np.ndarray) and 
+                (np.issubdtype(n0.dtype, np.floating) or
+                    np.issubdtype(n0.dtype, np.integer))):
+            if (n0.shape==(3,)):
+                n0 = np.repeat(n0[None,:], 
+                          len(dislocation_positions), 
+                          axis=0)                
+            elif (n0.shape==(1,3)):
+                n0 = np.repeat(n0, 
+                          len(dislocation_positions), 
+                          axis=0)
+            elif (n0.shape==(len(dislocation_positions),3)):
+                pass
+            else:
+                ValueError("If n0 is a floating or integer numpy array, "+
+                           "its shape must be either (3,) or (1,3) or "+
+                           "(n_dislocation, 3). In this case, n_dislocation = "+
+                           f"{len(dislocation_positions)} whereas the shape of n0 "+
+                           f"is {n0.shape}")
+        elif isinstance(n0, list):
+            if ((len(n0)==3) and 
+                 np.all([isinstance(x, (int, float)) for x in n0])):
+                n0 = np.repeat(np.array(n0)[None,:], 
+                          len(dislocation_positions), 
+                          axis=0)
+            elif ((len(n0)==1) and 
+                  (isinstance(n0[0], list) and len(n0[0])==3 and
+                   np.all([isinstance(x, (int, float)) for x in n0[0]])) or
+                  (isinstance(n0[0], np.ndarray) and n0[0].shape==(3,) and
+                   (np.issubdtype(n0[0], np.integer) or 
+                    np.issubdtype(n0[0], np.floating))) ):
+                n0 = np.repeat(n0, 
+                          len(dislocation_positions), 
+                          axis=0)
+            elif (len(n0)==len(dislocation_positions)):
+                for n0_entry in n0:
+                    if n0_entry is None:
+                        pass
+                    elif (isinstance(n0_entry, list) and len(n0_entry)==3 and
+                        np.all([isinstance(x, (int, float)) for x in n0_entry])):
+                        pass
+                    elif (isinstance(n0_entry, np.ndarray) and n0_entry.shape==(3,) and
+                         (np.issubdtype(n0_entry, np.integer) or 
+                          np.issubdtype(n0_entry, np.floating))):
+                        pass
+                    else:
+                        raise ValueError("If n0 is a list of n_dislocation entries, "+
+                                         "then each entry must be either None or list/array of "+
+                                         "three numbers (int/float)")
+            else:
+                raise ValueError("Wrong number of entries in n0")
+        else:
+            raise ValueError("n0 must be either None or a list or a numpy array") 
 
         u = np.zeros((len(detection_points), 3))
         stress = np.zeros((len(detection_points), 6))
