@@ -3,7 +3,7 @@ import scipy
 from .dislocation_fields import isotropic_soln
 
 class SingleStraightDislocation:
-    def __init__(self, nett_b, line_dir, core_mean_loc,
+    def __init__(self, nett_b, line_dir, core_mean_loc=np.array([0,0,0.]),
                  core_smearing_parameters={"dist_type": "delta",
                                            "dist_params": None,
                                            "core_spread_dir": None,
