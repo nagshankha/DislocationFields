@@ -1,9 +1,9 @@
 import numpy as np
-import voigt_fourth_rank_conversion_stiffness_matrix as stiff_conv
+#import voigt_fourth_rank_conversion_stiffness_matrix as stiff_conv
 import scipy
 from scipy.integrate import quad
-import sympy
-from sympy.utilities.autowrap import ufuncify
+#import sympy
+#from sympy.utilities.autowrap import ufuncify
 
 ##########################  STROH FORMALISM  #################################
 ##########################      (BEGIN)      #################################
