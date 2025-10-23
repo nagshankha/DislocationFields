@@ -160,7 +160,7 @@ class PeriodicArrayStraightDislocations:
             raise ValueError("Lattice extents must be provided for each "+
                              "lattice primitive vectors")
         if len(lattice_extents) == 1:
-            X = np.arange(*lattice_extents)
+            X = np.arange(*lattice_extents[0])
             dislocation_positions = ((X[:,None]*self.lattice_primitive_vectors) + 
                                      self.lattice_origin_loc)
         elif len(lattice_extents) == 2:
